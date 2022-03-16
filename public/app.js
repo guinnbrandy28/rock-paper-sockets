@@ -2,6 +2,9 @@
 const socket = io.connect("http://localhost:3000");
 
 //New Game Created Listener
+socket.on("newGame", (data) => {
+    console.log('new game created: ', data);
+})
 
 
 //Join Game Event Emitter
