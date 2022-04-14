@@ -51,33 +51,34 @@ io.on("connection", (socket) => {
             //existingGame = undefined;
         }
         else{
-            console.log('start new game ... TODO implement'); ///let them know you are waiting for another player
+            console.log('start new game ... TODO'); ///let them know you are waiting for another player
         }       
     });
 
     //Listener for Player 1's Choice
     //Listener to Player 2's Choice
     socket.on("choiceMade", (data) => {
-        // console.log("...server..existingGame",existingGame);
-        // console.log("server...choiceMade...", data);
-        let player1 = rooms[existingGame].player1;
-        let player2 = rooms[existingGame].player2;
-        rooms[existingGame].player1.socket.id === socket.id ?          
-            setChoiceAndScoreGame(player1.choice, data, player2.choice) :
-            setChoiceAndScoreGame(player2.choice, data, player1.choice);             
-    });
-
-    function setChoiceAndScoreGame(playerMakingChoice, choice, otherPlayersChoice) {
-        playerMakingChoice = choice;
-        if (otherPlayersChoice) {
-            gameOver(existingGame, rooms);
+        console.log("...server..existingGame",existingGame);
+        console.log("server...choiceMade...", data);
+        if(rooms[existingGame].player1.socket.id === socket.id){
+            rooms[existingGame].player1.choice = data.choice;
+            if(rooms[existingGame].player2.choice) {
+                gameOver(existingGame, rooms);                 
+            }
         }
-    }
+        else{
+            rooms[existingGame].player2.choice = data.choice;
+            if(rooms[existingGame].player1.choice) {
+                gameOver(existingGame, rooms);                 
+            }
+        }
+        
+    });
 
     //evaluate resultafter getting both choices
     function gameOver(existingGame, rooms) {        
         let outcome = scoreGame(rooms[existingGame]);
-        //console.log("server...gameOver...", outcome);
+        console.log("server...gameOver...", outcome);
         if (outcome.result === 'tie-game') {
             rooms[existingGame].player1.socket.emit("gameOver", { outcome: `Tie game, you both chose ${outcome.summary}` });
             rooms[existingGame].player2.socket.emit("gameOver", { outcome: `Sorry you lost ${rooms[existingGame].player2.name}.` });
@@ -92,9 +93,9 @@ io.on("connection", (socket) => {
 });
 
 function scoreGame(room) {
-    // console.log('room on server...room.player1', room.player1);
-    // console.log('room on server...room.player2', room.player2);
-    if(room.player1.choice === room.player2.choice) return {result:'tie-game', summary: room.player1.choice }; 
+    console.log('room on server...room.player1', room.player1);
+    console.log('room on server...room.player2', room.player2);
+    if(room.player1.choice === room.player2.choice) return {result:'tie-game', summary: room.player1.choice }; //rock<socket socket<paper paper<rock
 
     if(room.player1.choice === 'rock' && room.player2.choice === 'socket') return {result:'player1-winner', summary: 'rock beats socket' };
     if(room.player2.choice === 'rock' && room.player2.choice === 'paper') return {result:'player2-winner', summary: 'paper beats rock' };
